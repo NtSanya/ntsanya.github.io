@@ -23,6 +23,10 @@ My main interests are:
 - Software Development
 - CTFs
 
+
+![grandma](media/yep.png)
+
+
 ## Follow me
 
 - [Twitter](https://twitter.com/KiFastSyscall)
