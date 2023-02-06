@@ -11,7 +11,6 @@ lang: "en"
 excerpt_separator: "\n\n\n"
 date_format: "%B %d, %Y"
 
-remote_theme: pages-themes/hacker@v0.2.0
 
 # Layout
 
@@ -23,12 +22,13 @@ minimal: false             # use a dark header
 # Menu
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
-  - {file: "index.html"}
-  - {file: "README.md"}
+  - {file: "index.html", title: Home Change, icon: home}
+  - {file: "README.md", title: About me, icon: address-card}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
-  - {title: Mail, icon: envelope, url: "mailto:niklasbuschmann@users.noreply.github.com"}
+  - {title: Mail, icon: envelope, url: "mailto:ntsanya@users.noreply.github.com"}
   - {title: Github, icon: github, url: "https://github.com/ntsanya"}
+  - {title: Twitter, icon: twitter, url: "https://twitter.com/KiFastSyscall"}
 
 comments:
 #  disqus_shortname: ""    # see https://disqus.com/
