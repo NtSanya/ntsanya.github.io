@@ -26,6 +26,8 @@ navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {file: "index.html", title: "Home"}
   - {file: "README.md", title: "About me"}
   - {file: "404.html", title: "Archive"}
+  - {url: "https://twitter.com/KiFastSyscall", title: Twitter}
+  - {url: "https://github.com/NtSanya", title: Github}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
   - {title: Mail, icon: envelope, url: "mailto:ntsanya@users.noreply.github.com"}
