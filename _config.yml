@@ -23,7 +23,7 @@ show_social: true
 # Menu
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
-  - {file: "index.html", title: "Home"}
+  - {url: "https://ntsanya.github.io", title: "Home"}
   - {file: "blog.md", title: "Blog"}
   - {file: "README.md", title: "About me"}
   - {file: "404.html", title: "Archive"}
