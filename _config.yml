@@ -25,7 +25,7 @@ show_social: true
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {url: "https://ntsanya.github.io", title: "Home"}
   - {file: "blog.md", title: "Blog"}
-  - {file: "README.md", title: "About me"}
+  - {file: "aboutme.md", title: "About me"}
   - {file: "404.html", title: "Archive"}
   - {url: "https://twitter.com/KiFastSyscall", title: Twitter}
   - {url: "https://github.com/NtSanya", title: Github}
