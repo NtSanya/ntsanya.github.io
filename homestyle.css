@@ -113,7 +113,7 @@
        display:none;
     }
     body {
-      background: url('titanpointe.png');
+      background: url('titanpointe.png') no-repeat;
       background-size:cover;
     }
   }
