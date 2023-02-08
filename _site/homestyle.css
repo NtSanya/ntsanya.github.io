@@ -42,7 +42,7 @@ nav .logo{
 nav ul li{
   list-style: none;
   display: inline-block;
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 nav ul li a{
@@ -110,11 +110,17 @@ html {
 {
   .content h1
   {
-    font-size: 6em
+    font-size: 4em
   }
   .back-video
   {
      display:none;
+  }
+  nav ul li
+  {
+    list-style: none;
+    display: inline-block;
+    margin-left: 10px;
   }
   body {
     background: url('titanpointe.png');
