@@ -127,5 +127,6 @@ html {
     background-size:cover;
     background-repeat:no-repeat;
     background-position: 65%; 
+    height:100vh;
   }
 }
