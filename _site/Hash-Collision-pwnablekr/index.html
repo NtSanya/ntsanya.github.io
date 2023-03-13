@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.png">
+<title>Hash Collision - pwnable.kr | Семёрка</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Sanya">
+<meta name="generator" content="Jekyll v3.8.7">
+<link rel="canonical" href="http://localhost:4000/Hash-Collision-pwnablekr/">
+
+<link rel="stylesheet" href="/assets/css/index.css">
+
+<link rel="alternate" href="/feed.xml" type="application/atom+xml" title="Семёрка">
+
+<link rel="stylesheet" href="/assets/katex/katex.min.css">
+<script defer src="/assets/katex/katex.min.js"></script>
+<script defer src="/assets/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body)"></script>
+
+
+
+
+
+
+
+<header>
+  <a href="/" class="title">Семёрка</a>
+  <nav><a href="https://ntsanya.github.io" >Home</a><a href="/blog/" >Blog</a><a href="/about/" >About me</a><a href="/404.html" >Archive</a><a href="https://twitter.com/KiFastSyscall" >Twitter</a><a href="https://github.com/NtSanya" >Github</a></nav>
+
+</header>
+
+<article>
+  <header>
+  <h1><a href="/Hash-Collision-pwnablekr/">Hash Collision - pwnable.kr</a></h1><time datetime="2023-03-13T00:00:00-03:00">March 13, 2023</time>
+</header>
+
+  <p><img src="/media/hash-collision-pwnablekr/collision.png" alt="hash-collision" /></p>
+
+<h1 id="решенеие-задания-collision---pwnablekr">решенеие задания collision - pwnable.kr</h1>
+
+<h2 id="что-такое-хеш-функция">что такое <a href="https://ru.wikibrief.org/wiki/Cryptographic_hash_function">хеш-функция</a>?</h2>
+
+<blockquote>
+  <p>криптографическая хеш-функция (CHF ) - математический <a href="https://ru.wikibrief.org/wiki/Algorithm">алгоритм</a>, который <a href="https://ru.wikibrief.org/wiki/Map_(mathematics)">отображает</a> данные произвольных размер (часто называемый «сообщением») в <a href="https://ru.wikibrief.org/wiki/Bit_array">битовый массив</a> фиксированного размера («хеш-значение», «хеш» или «дайджест сообщения»<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup></p>
+</blockquote>
+
+<p>Хеш-функция берёт определённую информацию и преобразует эту информацию в строку определенной длины. Исходные данные могут быть любыми, от пароля вашего аккаунта до фильмов или книг.  Эта строка всегда будет иметь <strong>одинаковую длину</strong> вне зависимости от того, какого размера была входная информация.</p>
+
+<p>Есть очень важный момент:</p>
+
+<blockquote>
+  <ul>
+    <li>небольшое изменение в сообщении должно изменить значение хеш-функции настолько сильно, что новое значение хеш-функции будет не коррелировать со старым хеш-значение (<a href="https://ru.wikibrief.org/wiki/Avalanche_effect">лавинный эффект</a> )<sup id="fnref:1:1"><a href="#fn:1" class="footnote">1</a></sup></li>
+  </ul>
+</blockquote>
+
+<p>Например<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup>:</p>
+
+<p><img src="/media/hash-collision-pwnablekr/Cryptographic-Hashing-Explained-Rus.png" alt="хеш" /></p>
+
+<h2 id="pwnablekr---col">pwnable.kr - col</h2>
+
+<p><img src="/media/hash-collision-pwnablekr/banner.png" alt="banner" /></p>
+
+<p>Итак, у нас есть 3 файла, слева мы видим наши полномочия, где ‘s’ означает SUID<sup id="fnref:3"><a href="#fn:3" class="footnote">3</a></sup>, то есть, мы можем запускать файл с правами владельца.</p>
+
+<p>давайте посмотрим содержимое файла <em>col.c</em></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">hashcode</span> <span class="o">=</span> <span class="mh">0x21DD09EC</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="nf">check_password</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">p</span><span class="p">){</span>
+        <span class="kt">int</span><span class="o">*</span> <span class="n">ip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">p</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">res</span> <span class="o">+=</span> <span class="n">ip</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">argc</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"usage : %s [passcode]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">strlen</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"passcode length should be 20 bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">hashcode</span> <span class="o">==</span> <span class="n">check_password</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)){</span>
+                <span class="n">system</span><span class="p">(</span><span class="s">"/bin/cat flag"</span><span class="p">);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"wrong passcode.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Программа принимает в качестве аргумента строку из 20 символов. Строка предстаёт в виде 5 чисел, эти числа суммируются и их сумма проверятся со значением 0x21DD09EC.</p>
+
+<p>Проблема в том, что 0x21DD09EC не делится на 5. Нам нужно задать 5 чисел, сумма которых равна 0x21DD09EC.</p>
+
+<p>Давайте поделим 0x21DD09EC  на 5, возьмём результат без остатка, умножим на 4 и вычтем из 0x21DD09EC.</p>
+
+<p><img src="/media/hash-collision-pwnablekr/решение-col.png" alt="решение-col" /></p>
+
+<p>итак, наша строка будет выглядеть следующим образом: **0x6c5cec8 * 4 + 0x6c5cecc **.</p>
+
+<p><img src="/media/hash-collision-pwnablekr/решение2-col.png" alt="решение2-col" /></p>
+
+<h2 id="список-литературы">Список литературы:</h2>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>https://ru.wikibrief.org/wiki/Cryptographic_hash_function <a href="#fnref:1" class="reversefootnote">&#8617;</a> <a href="#fnref:1:1" class="reversefootnote">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:2">
+      <p>https://www.kaspersky.ru/blog/the-wonders-of-hashing/3633/ <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:3">
+      <p>https://ru.wikipedia.org/wiki/Suid <a href="#fnref:3" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  
+</article>
+
+
+
+<footer>
+  <div>• Windows Internals • Reverse Engineering  • Malware Analysis • Exploit Development
+</div>
+  <nav><a href="mailto:ntsanya@users.noreply.github.com" ><svg aria-label="Mail" class="icon"><use xlink:href="/assets/fontawesome/icons.svg#envelope"></use></svg></a><a href="https://github.com/ntsanya" ><svg aria-label="Github" class="icon"><use xlink:href="/assets/fontawesome/icons.svg#github"></use></svg></a><a href="https://twitter.com/KiFastSyscall" ><svg aria-label="Twitter" class="icon"><use xlink:href="/assets/fontawesome/icons.svg#twitter"></use></svg></a></nav>
+
+</footer>
+
+
+</html>
