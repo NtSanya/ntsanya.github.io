@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-03-13T11:08:34-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Семёрка</title><subtitle>• Windows Internals • Reverse Engineering  • Malware Analysis • Exploit Development
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-03-13T11:12:32-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Семёрка</title><subtitle>• Windows Internals • Reverse Engineering  • Malware Analysis • Exploit Development
 </subtitle><author><name>Sanya</name></author><entry><title type="html">Hash Collision - pwnable.kr</title><link href="http://localhost:4000/Hash-Collision-pwnablekr/" rel="alternate" type="text/html" title="Hash Collision - pwnable.kr" /><published>2023-03-13T00:00:00-03:00</published><updated>2023-03-13T00:00:00-03:00</updated><id>http://localhost:4000/Hash-Collision-pwnablekr</id><content type="html" xml:base="http://localhost:4000/Hash-Collision-pwnablekr/">![hash-collision](/media/hash-collision-pwnablekr/collision.png)
 
-# решенеие задания collision - pwnable.kr
+# решение задания collision - pwnable.kr
 
 
 
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]){
 
 [^1]: https://ru.wikibrief.org/wiki/Cryptographic_hash_function
 [^2]:https://www.kaspersky.ru/blog/the-wonders-of-hashing/3633/
-[^3]: https://ru.wikipedia.org/wiki/Suid</content><author><name>Sanya</name></author><summary type="html">решенеие задания collision - pwnable.kr</summary></entry><entry><title type="html">Microcorruption UAF Exploitation - Algiers</title><link href="http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF/" rel="alternate" type="text/html" title="Microcorruption UAF Exploitation - Algiers" /><published>2023-02-07T00:00:00-03:00</published><updated>2023-02-07T00:00:00-03:00</updated><id>http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF</id><content type="html" xml:base="http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF/">![UAFCTF](/media/uaf.png?raw=true)
+[^3]: https://ru.wikipedia.org/wiki/Suid</content><author><name>Sanya</name></author><summary type="html">решение задания collision - pwnable.kr</summary></entry><entry><title type="html">Microcorruption UAF Exploitation - Algiers</title><link href="http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF/" rel="alternate" type="text/html" title="Microcorruption UAF Exploitation - Algiers" /><published>2023-02-07T00:00:00-03:00</published><updated>2023-02-07T00:00:00-03:00</updated><id>http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF</id><content type="html" xml:base="http://localhost:4000/UAF-Exploitation-MicrocorruptionCTF/">![UAFCTF](/media/uaf.png?raw=true)
 
 # Microcorruption - Algiers
 

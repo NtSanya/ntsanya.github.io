@@ -7,7 +7,7 @@ categories: media
 
 ![hash-collision](/media/hash-collision-pwnablekr/collision.png)
 
-# решенеие задания collision - pwnable.kr
+# решение задания collision - pwnable.kr
 
 
 
