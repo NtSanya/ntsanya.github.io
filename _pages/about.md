@@ -2,7 +2,7 @@
 layout: page
 title: About
 permalink: /about/
-image: '/images/titanpointe.png'
+image: '/images/querysysteminfo.png'
 ---
 Yo!
 
