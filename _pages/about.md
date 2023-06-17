@@ -4,12 +4,11 @@ title: About
 permalink: /about/
 image: '/images/querysysteminfo.png'
 ---
-Yo!
 
-This is my website, I love low level stuff.
+I love low level stuff.
 I hope you find this blog interesting and learn something new...
 
-The articles are usually written in russian and english.
+I write articles in russian and english.
 
 My main interests are:
 
@@ -18,7 +17,7 @@ My main interests are:
 - Windows Internals
 - Exploit Development
 - Kernel Development
-- Software Development
+- Game hacking
 - CTFs
 
 
