@@ -1,0 +1,56 @@
+==================================================================
+https://keybase.io/ntsanya
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://ntsanya.github.io
+  * I am ntsanya (https://keybase.io/ntsanya) on keybase.
+  * I have a public key ASC5kv1CL-kznpoR0v3qCkWB7MlaTwBX4wU2rAs0Nap0Mgo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0120b992fd422fe9339e9a11d2fdea0a4581ecc95a4f0057e30536ac0b3435aa74320a",
+      "host": "keybase.io",
+      "kid": "0120b992fd422fe9339e9a11d2fdea0a4581ecc95a4f0057e30536ac0b3435aa74320a",
+      "uid": "9b328f29be17c9816571f13f17524719",
+      "username": "ntsanya"
+    },
+    "merkle_root": {
+      "ctime": 1700266890,
+      "hash": "08bec0163f4412b2482f77fd5c8fce4272a4c16b219fda24294e19240eae476adb4d1e616a48130af9651d5d14737fc69e991171af2d3b0eca69ce055e512a71",
+      "hash_meta": "0f563e83e3e124369c49872ccebcb4d20586b33187e8574c7082706e6c8e043b",
+      "seqno": 25156766
+    },
+    "service": {
+      "entropy": "8+o5QlA8XXB/88ZwGY/mYeR7",
+      "hostname": "ntsanya.github.io",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 2
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "6.2.3"
+  },
+  "ctime": 1700267028,
+  "expire_in": 504576000,
+  "prev": "bb54010193da972dc73d86fa9c000c921a7b20ccf7ac57a2f6ebaef20d4a4a83",
+  "seqno": 8,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEguZL9Qi/pM56aEdL96gpFgezJWk8AV+MFNqwLNDWqdDIKp3BheWxvYWTESpcCCMQgu1QBAZPaly3HPYb6nAAMkhp7IMz3rFei9uuu8g1KSoPEII3qzaiYTaZmM4Epl3oMNf0U9zyUCBMP/de1jtDV4EZnAgHCo3NpZ8RAkYis2u+20D+YNyvrud2Z2e2jjFcnEdSa6NNCUuuweyc7hVLWkC8dbkrTcAdGV31p3TgFql9als8TT7oBwQFLDqhzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIKF6bUiGFWZHhjZJAi0q5skgTPzqZa9SFJzZVuQQilRBo3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/ntsanya
+
+==================================================================
