@@ -33,7 +33,6 @@
       flex-direction: column;
     }
   }
-
 }
 
 .post-image {
@@ -48,11 +47,12 @@
 
 .image-box {
   position: relative;
-  padding-top: 90%;
-  min-height: 280px;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  min-height: 0; /* Prevent the minimum height from affecting the size */
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 5px 10px 0px rgba(0,0,0,.15);
+  box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.15);
   background-color: $dark;
 
   @media only screen and (max-width: $tablet) {
@@ -381,7 +381,7 @@
       width: 106px;
       height: 38px;
       border-radius: 4px 0px 0px 4px;
-      background: linear-gradient(90deg, $brand-color -5.19%, rgba($background-color, 0) 100%);;
+      background: linear-gradient(90deg, $brand-color -5.19%, rgba($background-color, 0) 100%);
     }
     @media only screen and (max-width: $desktop) {
       font-size: 24px;

@@ -6,11 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Семёрка</title>
-  <meta name='description' content='• Windows Internals • Reverse Engineering  • Malware Analysis • Exploit Development
-'>
+  <title>Hash Collision - pwnable.kr - решение</title>
+  <meta name='description' content='CTF Writeup pwnable.kr'>
 
-  <link rel="canonical" href="http://localhost:4000/tag/hash/">
+  <link rel="canonical" href="http://localhost:4000/2023/03/13/Hash-Collision-pwnablekr/">
   <link rel="alternate" type="application/rss+xml" title="Семёрка" href="/feed.xml">
 
   <!-- Fonts -->
@@ -273,73 +272,205 @@
 
   <!-- begin content -->
   <main class="content" aria-label="Content">
-    <div class="container">
-  <div class="row">
-    <div class="col col-8 col-d-10 col-m-12 push-m-0 push-d-1 push-2">
-      <div class="archive-box">
-        <span class="archive-meta">1 post  tagged</span>
-        <h1 class="archive-title">hash</h1>
+    <style>
+  .image-box {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+  }
+
+  .post-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: auto;
+  }
+</style>
+
+<div class="post-head">
+  <div class="container">
+    <div class="row">
+      
+      <div class="col col-6 col-t-12">
+        <div class="image-box">
+          <img class="post-image lazy" data-src="/media/posts_thumb/collision.png" alt="Hash Collision - pwnable.kr - решение">
+        </div>
+      </div>
+      
+  
+      <div class="col col-6 col-t-12">
+        <div class="post-head__box">
+        
+          <div class="post__meta">
+            <span class="post__minutes">
+              
+              
+                2 min read
+              
+              <time class="post__date"
+                datetime="2023-03-13T00:00:30+03:00">Mar 13, 2023</time>
+            </span>
+          </div>
+        
+          <h2 class="post__title">Hash Collision - pwnable.kr - решение</h2>
+        
+          <div class="post__bottom">
+        
+            <div class="post__author">
+              <a href="/about/" aria-label="Sanya"><img class="post__author-image"
+                  src="/images/15.png" alt="Sanya's Picture"></a>
+            </div>
+        
+            <div class="post__bottom-meta">
+              <a href="/about/" class="post__author-link">Sanya</a>
+              
+            </div>
+          </div>
+        
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- begin post -->
 <div class="container">
-  <div class="row">
-    <div class="col col-12 col-d-10 col-m-12 push-m-0 push-d-1">
-      <div class="container__inner">
-        <div class="row grid">
-          
-            <div class="article col col-4 col-d-6 col-t-12 grid__post animate">
-  <div class="article__inner">
+  <article class="post animate">
 
-    
-    <a class="article__image" href="/2023/03/13/Hash-Collision-pwnablekr/">
-      <img class="lazy" data-src="/media/posts_thumb/collision.png" alt="Hash Collision - pwnable.kr - решение">
-    </a>
-    
+    <div class="post__content">
+      <h1 id="решение-задания-collision---pwnablekr">решение задания collision - pwnable.kr</h1>
 
-    <div class="article__content">
+<h2 id="что-такое-хеш-функция">что такое <a href="https://ru.wikibrief.org/wiki/Cryptographic_hash_function">хеш-функция</a>?</h2>
 
-      <div class="article__meta">
-        <span class="article__minutes">
-          
-            
-              2 min read
-          
-          <time class="article__date" datetime="2023-03-13T00:00:30+03:00">Mar 13, 2023</time>
-        </span>
-      </div>
+<blockquote>
+  <p>криптографическая хеш-функция (CHF ) - математический <a href="https://ru.wikibrief.org/wiki/Algorithm">алгоритм</a>, который <a href="https://ru.wikibrief.org/wiki/Map_(mathematics)">отображает</a> данные произвольных размер (часто называемый «сообщением») в <a href="https://ru.wikibrief.org/wiki/Bit_array">битовый массив</a> фиксированного размера («хеш-значение», «хеш» или «дайджест сообщения»<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></p>
+</blockquote>
 
-      <h2 class="article__title">Hash Collision - pwnable.kr - решение</h2>
+<p>Хеш-функция берёт определённую информацию и преобразует эту информацию в строку определенной длины. Исходные данные могут быть любыми, от пароля вашего аккаунта до фильмов или книг.  Эта строка всегда будет иметь <strong>одинаковую длину</strong> вне зависимости от того, какого размера была входная информация.</p>
 
-      <p class="article__excerpt">CTF Writeup pwnable.kr</p>
+<p>Есть очень важный момент:</p>
 
-      <div class="article__bottom">
+<blockquote>
+  <ul>
+    <li>небольшое изменение в сообщении должно изменить значение хеш-функции настолько сильно, что новое значение хеш-функции будет не коррелировать со старым хеш-значение (<a href="https://ru.wikibrief.org/wiki/Avalanche_effect">лавинный эффект</a> )<sup id="fnref:1:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></li>
+  </ul>
+</blockquote>
 
-        
-        <div class="article__author">
-          <a href="/about/" aria-label="Sanya"><img class="article__author-image lazy" data-src="/images/15.png" alt="Sanya's Picture"></a>
-        </div>
-        
+<p>Например<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>:</p>
 
-        <div class="article__bottom-meta">
-          
-            <a href="/about/" class="article__author-link">Sanya</a>
-          
-        </div>
-      </div>
+<p><img src="/media/hash-collision-pwnablekr/Cryptographic-Hashing-Explained-Rus.png" alt="хеш" /></p>
+
+<h2 id="pwnablekr---col">pwnable.kr - col</h2>
+
+<p><img src="/media/hash-collision-pwnablekr/banner.png" alt="banner" /></p>
+
+<p>Итак, у нас есть 3 файла, слева мы видим наши полномочия, где ‘s’ означает SUID<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>, то есть, мы можем запускать файл с правами владельца.</p>
+
+<p>давайте посмотрим содержимое файла <em>col.c</em></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">hashcode</span> <span class="o">=</span> <span class="mh">0x21DD09EC</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="nf">check_password</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">p</span><span class="p">){</span>
+        <span class="kt">int</span><span class="o">*</span> <span class="n">ip</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="n">p</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">res</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">res</span> <span class="o">+=</span> <span class="n">ip</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">argc</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"usage : %s [passcode]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">strlen</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">20</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"passcode length should be 20 bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">hashcode</span> <span class="o">==</span> <span class="n">check_password</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)){</span>
+                <span class="n">system</span><span class="p">(</span><span class="s">"/bin/cat flag"</span><span class="p">);</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">"wrong passcode.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Программа принимает в качестве аргумента строку из 20 символов. Строка предстаёт в виде 5 чисел, эти числа суммируются и их сумма проверятся со значением 0x21DD09EC.</p>
+
+<p>Проблема в том, что 0x21DD09EC не делится на 5. Нам нужно задать 5 чисел, сумма которых равна 0x21DD09EC.</p>
+
+<p>Давайте поделим 0x21DD09EC  на 5, возьмём результат без остатка, умножим на 4 и вычтем из 0x21DD09EC.</p>
+
+<p><img src="/media/hash-collision-pwnablekr/решение-col.png" alt="решение-col" /></p>
+
+<p>итак, наша строка будет выглядеть следующим образом: <strong>0x6c5cec8 * 4 + 0x6c5cecc</strong>.</p>
+
+<p><img src="/media/hash-collision-pwnablekr/решение2-col.png" alt="решение2-col" /></p>
+
+<h2 id="список-литературы">Список литературы:</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>https://ru.wikibrief.org/wiki/Cryptographic_hash_function <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:1:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>https://www.kaspersky.ru/blog/the-wonders-of-hashing/3633/ <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p>https://ru.wikipedia.org/wiki/Suid <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
 
     </div>
 
-  </div>
-</div>
-          
-        </div>
+    <div class="post__share">
+      <div class="share__list">
+        <a class="share__link share__facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/2023/03/13/Hash-Collision-pwnablekr/" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook" rel="nofollow"><i class="ion ion-logo-facebook"></i></a>
+
+        <a class="share__link share__twitter" href="https://twitter.com/intent/tweet?text=Hash%20Collision%20-%20pwnable.kr%20-%20%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D0%B5&url=http://localhost:4000/2023/03/13/Hash-Collision-pwnablekr/" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter" rel="nofollow"><i class="ion ion-logo-twitter"></i></a>
+
+        <a class="share__link share__pinterest" href="http://pinterest.com/pin/create/button/?url=http://localhost:4000/2023/03/13/Hash-Collision-pwnablekr/&amp;media=http://localhost:4000/media/posts_thumb/collision.png&amp;description=Hash%20Collision%20-%20pwnable.kr%20-%20%D1%80%D0%B5%D1%88%D0%B5%D0%BD%D0%B8%D0%B5" onclick="window.open(this.href, 'pop-up', 'left=20,top=20,width=900,height=500,toolbar=1,resizable=0'); return false;" title="Share on Pinterest" rel="nofollow"><i class="ion ion-logo-pinterest"></i></a>
       </div>
     </div>
-  </div>
+
+    <div class="post__navigation">
+      
+      <a class="prev" href="/2023/02/07/UAF-Exploitation-MicrocorruptionCTF/">
+        <img class="post__nav-image lazy" data-src="/media/posts_thumb/uaf.png" alt="Microcorruption UAF Exploitation - Algiers">
+        <div class="post__nav-box">
+          <div class="post__nav post__nav__prev"><i class="ion ion-md-arrow-round-back"></i> Previous Post</div>
+          <h4 class="post__nav__title">Microcorruption UAF Exploitation - Algiers</h4>
+        </div>
+      </a>
+      
+      
+      <a class="next" href="/2023/05/25/ROP-Emporium-badchars/">
+        <img class="post__nav-image lazy" data-src="/media/posts_thumb/badchars.png" alt="badchars - ROP Emporium">
+        <div class="post__nav-box">
+          <div class="post__nav post__nav__next">Next Post <i class="ion ion-md-arrow-forward"></i></div>
+          <h4 class="post__nav__title">badchars - ROP Emporium</h4>
+        </div>
+      </a>
+      
+    </div>
+
+  </article>
 </div>
+<!-- end post -->
+
+
+
+
+
   </main> 
   <!-- end content -->
   
@@ -365,7 +496,7 @@
           <span class="article__minutes">
             
             
-              6 min read
+              4 min read
             
           </span>
           <time class="article__date"
@@ -392,7 +523,7 @@
           <span class="article__minutes">
             
             
-              14 min read
+              10 min read
             
           </span>
           <time class="article__date"

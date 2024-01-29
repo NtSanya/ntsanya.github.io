@@ -1,0 +1,156 @@
+{
+  "main": {
+    "id": "65d9d1ed20bce608",
+    "type": "split",
+    "children": [
+      {
+        "id": "a123c38ee517d8fa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e3afa36e94b48047",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2023-03-13-Hash-Collision-pwnablekr.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e9196ddb9ed287c2",
+    "type": "split",
+    "children": [
+      {
+        "id": "b95510b5d1291502",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cb967dbab9562d26",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "14ff3edf974f8559",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "e326ec343b867842",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6497bc4d9a35c23a",
+    "type": "split",
+    "children": [
+      {
+        "id": "fdf683233b1ffbdb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "00a8e9d5631bce74",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "2023-03-13-Hash-Collision-pwnablekr.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "89194d0daded0e65",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "2023-03-13-Hash-Collision-pwnablekr.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "779b8f3bfc30b71f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "2c118e67c5d1d783",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "2023-03-13-Hash-Collision-pwnablekr.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Меню быстрого перехода": false,
+      "graph:Граф": false,
+      "canvas:Создать новый холст": false,
+      "daily-notes:Сегодняшняя заметка": false,
+      "templates:Вставить шаблон": false,
+      "command-palette:Открыть палитру команд": false
+    }
+  },
+  "active": "e3afa36e94b48047",
+  "lastOpenFiles": [
+    "Cryptographic-Hashing-Explained-Rus.png",
+    "решение-col.png",
+    "решение2-col.png",
+    "banner.png"
+  ]
+}
