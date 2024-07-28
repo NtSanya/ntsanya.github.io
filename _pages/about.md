@@ -5,7 +5,7 @@ permalink: /about/
 image: '/images/querysysteminfo.png'
 ---
 
-Thoughts and notes about Exploit development, C++ and Game Hacking 
+Thoughts and notes about Vulnerability Research, C++ and Game Hacking 
 
 My main interests are:
 

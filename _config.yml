@@ -22,7 +22,7 @@ author:
 # Hero Settings
 hero:
   title: Семёрка
-  description: Exploit Development, Game Hacking, C++, Malware Analysis
+  description: Vulnerability Research, Game Hacking, C++, Malware Analysis
   image: '/images/ida.png'
 
 
