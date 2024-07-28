@@ -1,0 +1,162 @@
+---
+layout: default
+---
+
+<style>
+  .hero__image {
+    width: 100%;
+    /* max-width: auto; */
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+  }
+
+  .hero__image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: auto;
+  }
+</style>
+
+<!-- begin hero -->
+{% if page.image %}
+<section class="hero">
+  <div class="hero__inner">
+    <div class="hero__image">
+      <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
+    </div>
+    <div class="hero__content">
+      <h1 class="hero__title">{{page.title}}</h1>
+    </div>
+  </div>
+</section>
+{% else %}
+<section class="hero-without-image">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <h1 class="hero__title">{{page.title}}</h1>
+    </div>
+  </div>
+</section>
+{% endif %}
+<!-- end hero -->
+
+
+
+
+<style>
+  .container {
+      display: flex; 
+      align-items: flex-start;
+      gap: 20px; 
+  }
+
+  ul {
+      margin: 0px;
+      padding: 0;
+      list-style:circle;
+  }
+
+  li {
+      white-space: nowrap; 
+      overflow:visible; 
+      text-overflow: ellipsis; 
+      max-width: 300px;
+  }
+
+  .image-container {
+      position: relative;
+      width: 30vw; 
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 5px solid #5080bf; 
+      box-sizing: border-box;
+  }
+
+  .image-container img {
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
+  }
+
+  @media (max-width: 1280px) {
+      .image-container {
+          display: none;
+          border: 5px solid #5080bf;
+      }
+  }
+</style>
+
+
+<!-- begin page -->
+<div class="container">
+  <article class="page animate">
+    <div class="page__content">
+      
+      <!-- begin page -->
+      <div class="container">
+        <article class="page animate">
+          <div class="page__content">
+            <p>Thoughts and notes about Exploit development, C++ and Game Hacking</p>
+
+      <p>My main interests are:</p>
+      <div class="container" >
+        <ul>
+          <li>Exploit Development ( Windows / iOS )</li>
+          <li>Game hacking</li>
+          <li>Reverse Engineering</li>
+          <li>Kernel Development</li>
+          <li>CTFs</li>
+          <li>Software Engineering</li>
+        </ul>
+        <div style="position: relative; width: 100%; height: auto;">
+          <div style="
+              position: absolute;
+              left: 20vw;
+              top: 7vw;
+              transform: translate(-50%, -50%);
+              width: 30vw; /* Adjust size relative to viewport width */
+              max-width: 300px; /* Maximum size */
+              height: auto; /* Maintain aspect ratio */
+              aspect-ratio: 1 / 1; /* Maintain circular aspect ratio */
+              border-radius: 50%;
+              overflow: hidden;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-sizing: border-box;">
+
+              <img src="../images/mirai0.png" class="image-container">
+          </div>
+        </div>
+
+      </div>
+
+      <br/>
+      <h2 id="follow-me">Follow me</h2>
+
+      <ul>
+        <li><a href="https://twitter.com/KiFastSyscall">Twitter</a></li>
+        <li><a href="https://github.com/NtSanya">Github</a></li>
+      </ul>
+
+      <br/>
+
+      <p><img src="/images/yep.png" alt="grandma" /></p>
+          </div>
+        </article>
+      </div>
+      <!-- end page -->
+
+
+
+    </div>
+  </article>
+</div>
+<!-- end page -->

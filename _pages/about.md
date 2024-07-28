@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: pageabout
 title: About
 permalink: /about/
 image: '/images/querysysteminfo.png'

@@ -18,7 +18,7 @@
 
 .header__inner {
   position: relative;
-  display: flex;
+  display:flow-root;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
