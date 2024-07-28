@@ -8,6 +8,12 @@ $base-spacing-unit: 20px;
 // Transition
 $global-transition: all .2s;
 
+// custom font
+@font-face {
+    font-family: 'LunemaBold';
+    src: url(/LunemaBold.otf);
+};
+
 
 // *****************
 // Color Variables
@@ -33,12 +39,12 @@ $base-font-size: 18px;
 $base-font-style: normal;
 $base-font-variant: normal;
 $base-font-weight: normal;
-$base-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+$base-font-family: 'LunemaBold', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
 $base-line-height: 1.7;
 
 // Headings
 $heading-font-weight: 900;
-$heading-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+$heading-font-family: 'LunemaBold', -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
 $heading-color: $text-color;
 
 $font-size-h1:  36px;
