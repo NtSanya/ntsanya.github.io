@@ -16,11 +16,10 @@ My main interests are:
 - CTFs
 - Software Engineering
 
-
-![grandma](/images/yep.png)
-
-
 ## Follow me
 
 - [Twitter](https://twitter.com/KiFastSyscall)
 - [Github](https://github.com/NtSanya)
+
+
+![grandma](/images/yep.png)

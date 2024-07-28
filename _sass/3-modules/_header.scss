@@ -17,10 +17,10 @@
 }
 
 .header__inner {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position:absolute;
+  display:flow-root;
+  justify-content:left;
+  align-items:end;
   flex-wrap: wrap;
 }
 
@@ -34,7 +34,7 @@
   color: $text-color;
   text-transform: uppercase;
   text-decoration: none;
-  letter-spacing: -1px;
+  letter-spacing: 1px;
   &:hover {
     color: $brand-color;
   }
