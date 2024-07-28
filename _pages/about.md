@@ -5,20 +5,16 @@ permalink: /about/
 image: '/images/querysysteminfo.png'
 ---
 
-I love low level stuff.
-I hope you find this blog interesting and learn something new...
-
-I write articles in russian and english.
+Thoughts and notes about Exploit development, C++ and Game Hacking 
 
 My main interests are:
 
-- Malware
-- Reverse Engineering
-- Windows Internals
-- Exploit Development
-- Kernel Development
+- Exploit Development ( Windows / iOS )
 - Game hacking
+- Reverse Engineering
+- Kernel Development
 - CTFs
+- Software Engineering
 
 
 ![grandma](/images/yep.png)
