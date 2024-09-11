@@ -1,10 +1,10 @@
 #-------------------------------
 # General Site Settings
-title: "Семёрка"
+title: "SanyaSec"
 logo: # You can add own logo. For example '/images/logo.png'.
 description: >
  • Windows Internals
- • Reverse Engineering 
+ • Reverse Engineering
  • Malware Analysis
  • Exploit Development
 baseurl: "" # The subpath of your site, e.g. /blog
@@ -21,7 +21,7 @@ author:
 #-------------------------------
 # Hero Settings
 hero:
-  title: Семёрка
+  title: SanyaSec
   description: Vulnerability Research, Game Hacking, C++, Malware Analysis
   image: '/images/ida.png'
 
@@ -29,7 +29,7 @@ hero:
 #-------------------------------
 # Contact Settings
 contact:
-  email: ntsanya@yandex.ru # Add your email for contact form
+  email: ntsanya.aslr@gmail.com
   description: Description test
 
 # NOTE
